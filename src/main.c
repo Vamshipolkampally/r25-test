@@ -23,44 +23,44 @@ void write_to_SB(FILE *file, const char *format, int value);
 int main(int argc, char **argv) {
     if (argc < 3) {
         fprintf(stderr, "Usage: %s <SBUS_port> <Sabertooth_port>\n", argv[0]);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     char *port_name_1 = argv[1]; // SBUS 
-    char *port_name_2 = argv[2]; // Sabertooth1
+    char *port_name_2 = argv[2]; // Sabertooth
 
-    FILE *sbus; 
-    FILE *sabertooth;
+    FILE *sbus = NULL;
+    FILE *sabertooth = NULL;
 
-    // to store SBUS packets
-    uint8_t sbus_packet[25];
+    // To store SBUS packets
+    uint8_t sbus_packet[25] = {0};
 
-    // to store value of individual RC channel
-    uint16_t *channel;
+    // To store value of individual RC channel
+    uint16_t *channel = NULL;
 
     // PWM value after interpolation
-    int pwm;
+    int pwm = 0;
 
     // Opening serial ports for communication with SBUS and Sabertooth
     sbus = open_file(port_name_1, "rb");
     if (!sbus) {
-        perror("Failed to open SBUS port");
-        return 1;
+        fprintf(stderr, "Failed to open SBUS port %s\n", port_name_1);
+        return EXIT_FAILURE;
     }
 
     sabertooth = open_file(port_name_2, "w");
     if (!sabertooth) {
-        perror("Failed to open Sabertooth port");
+        fprintf(stderr, "Failed to open Sabertooth port %s\n", port_name_2);
         close_file(sbus);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // Read data from RC transmitter using SBUS
-    if (read_SBUS(sbus_packet, sizeof(sbus_packet), sbus) == 0) {
+    if (read_SBUS(sbus_packet, sizeof(sbus_packet), sbus) != sizeof(sbus_packet)) {
         fprintf(stderr, "Failed to read SBUS data\n");
         close_file(sbus);
         close_file(sabertooth);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     // Parsing SBUS packet
@@ -71,12 +71,13 @@ int main(int argc, char **argv) {
 
     // Write data to Sabertooth 1
     write_to_SB(sabertooth, "%d\n", pwm);
+    fflush(sabertooth); // Ensure the data is sent immediately
 
     // Closing all serial ports
     close_file(sbus);
     close_file(sabertooth);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 // Function to open a file or serial port
@@ -96,19 +97,25 @@ void close_file(FILE *file) {
     }
 }
 
-// Function to read SBUS data (mock implementation)
+// Function to read SBUS data (actual size of SBUS packet is 25 bytes)
 size_t read_SBUS(uint8_t *buffer, size_t size, FILE *file) {
     return fread(buffer, 1, size, file);
 }
 
-// Function to parse SBUS data into channels (mock implementation)
+// Function to parse SBUS data into channels
 uint16_t *parse_buffer(uint8_t buff[]) {
     static uint16_t channel[16];
     uint16_t mask = 0x7ff;
 
-    channel[0] = ((buff[1] | buff[2] << 8) & mask);
-    channel[1] = ((buff[2] >> 3 | buff[3] << 5) & mask);
-    // Add more channels as needed
+    channel[0]  = ((buff[1] | buff[2] << 8)                 & mask);
+    channel[1]  = ((buff[2] >> 3 | buff[3] << 5)            & mask);
+    channel[2]  = ((buff[3] >> 6 | buff[4] << 2 | buff[5] << 10) & mask);
+    channel[3]  = ((buff[5] >> 1 | buff[6] << 7)            & mask);
+    channel[4]  = ((buff[6] >> 4 | buff[7] << 4)            & mask);
+    channel[5]  = ((buff[7] >> 7 | buff[8] << 1 | buff[9] << 9)  & mask);
+    channel[6]  = ((buff[9] >> 2 | buff[10] << 6)           & mask);
+    channel[7]  = ((buff[10] >> 5 | buff[11] << 3)          & mask);
+    // Add remaining channels as necessary
 
     return channel;
 }
