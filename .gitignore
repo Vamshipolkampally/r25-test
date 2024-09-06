@@ -1,10 +1,7 @@
-# Prerequisites
-*.d
-
-# cmake
+# CMake
 *.cmake
 CMakeCache.txt
-CMakeFiles/*
+CMakeFiles/
 
 # Object files
 *.o
@@ -27,7 +24,7 @@ CMakeFiles/*
 *.la
 *.lo
 
-# Shared objects (inc. Windows DLLs)
+# Shared objects (including Windows DLLs)
 *.dll
 *.so
 *.so.*
@@ -60,6 +57,8 @@ dkms.conf
 build/
 .cache/
 compile_commands.json
+
+# Test output files
 test/sab_1
 test/sab_2
 test/sbus_data
