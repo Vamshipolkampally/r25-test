@@ -44,15 +44,15 @@ If you are able to compile your code successfully you should see something like 
 
 # Solution
 ## Understanding
-Describe what you understood about the problem.
+The project is about controlling a rover's motor using an RC transmitter and a Sabertooth motor driver. The RC transmitter sends signals that are picked up by an SBUS receiver. This receiver turns the signals into data, which is then used to control the Sabertooth motor driver. The driver controls the rover’s motor, making it move forward or backward based on the signals received from the transmitter.
 
 ## Thought Process
-After understanding the problem, describe how you decided to proceed towards solving the question.
+To control the rover's motor, start by understanding the key parts: an RC transmitter sends control signals, which are picked up by an SBUS receiver. The receiver turns these signals into data. Next, you need to convert this data into a format the Sabertooth motor driver can use. This involves adjusting the data so the motor driver knows how to move the motor. Finally, you send this adjusted data to the motor driver to make the rover move forward or backward as commanded. Testing and fixing any issues ensures everything works smoothly.
 
 ## Implementation
-How did you decide to implement your solution.
+To implement the code for controlling the Sabertooth motor driver with an RC transmitter, start by setting up the environment and ensuring you have the necessary libraries for serial communication and data parsing. Open serial ports for the SBUS receiver and Sabertooth motor driver. Implement a function to read data from the SBUS receiver and parse this data into channel values. Convert these channel values into PWM signals suitable for the Sabertooth driver using interpolation. Write the PWM signals to the Sabertooth motor driver and ensure to close the serial ports properly when done. Test the system to make sure the motor responds correctly to the RC transmitter’s commands and debug any issues as needed.
 
-Mention the details, such as the scaling used in the interpolation and how you tested it.
+took the refrence from chatgpt
 
 # Google Form
 [Link to Repo Submission](https://docs.google.com/forms/d/e/1FAIpQLSeKVbm2dqWxwA5lbEkRfzY8KF619mI5ibGs0Cm2e5wrb0hoWQ/viewform)
